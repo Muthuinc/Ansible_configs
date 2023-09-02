@@ -1,0 +1,36 @@
+ - hosts: muthu
+    remote_user: ubuntu
+    become: yes
+    tasks:
+      - name: apt update                        
+        apt:
+          update_cache: yes
+      - name: installing nginx                      # installation of nginx webserver on remote machine
+        apt:
+          name: nginx
+          state: present
+      - name: copying files                         # copy the webpage code base from local to remote for deployment
+        copy:
+          src: hills/
+          dest: /var/www/html
+
+# ---------------------------------------------------------------------------------------------------------------------------------
+ 
+      - name: pull an image                         # ansible docker module to pull the image 
+        docker_image:
+          name: muthuinc/devopsthon:v1
+          source: pull
+      - name: start an image                        # starting the docker container
+        docker_container:
+          name: my_container
+          image: muthuinc/devopsthon:v1
+          ports:
+            - "9000:5000"
+      - name: stop the container
+        docker_container:
+          name: my_container
+          state: stopped
+      - name: removing the container
+        docker_container:
+          name: my_container
+          state: absent

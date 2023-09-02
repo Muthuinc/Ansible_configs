@@ -1,0 +1,2 @@
+[muthu]
+instance ansible_hosts:<your public ip goes here> ansible_ssh_private_key_file=<path to private key (absolute or relative) ansible_ssh_common_args='-o StrictHostKeyChecking=no'

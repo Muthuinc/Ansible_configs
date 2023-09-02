@@ -1,0 +1,43 @@
+ - hosts: muthu
+    remote_user: ubuntu
+    become: yes
+    tasks:
+      - name: Create a user                                   # Creating a user
+        user:
+          name: Ava
+          shell: /bin/bash
+          create_home: true                                   # the below password is in encrypted form
+          password: $6$/bJ7G6uIJFnf/eB4$6z2ie2D1Y85Y7iBtACoQM5UHnY7LZWbGGAxZiR8dVQqLLpkOIUM8w8gJIT80hQAklBzJncNVPv8MJH8t.gRc20
+          generate_ssh_key: yes
+          ssh_key_bits: 2048
+          ssh_key_file: .ssh/id_rsa
+      - name: Create a group
+        group:
+          name: Develop
+      - name: Create another group
+        group:
+          name: Production
+        
+      - name: adding user to the develop group
+        user: 
+          name: Ava
+          group: Develop
+
+      - name: appending to the the Production group
+        user: 
+          name: Ava
+          groups: Production
+          append: yes
+      - name: create a directory in the user home folder with permission    # this will create a directory with restricted permissions
+        file:
+          path: /home/Ava/myfiles
+          state: directory
+          mode: u+rwx,g+r,o-rwx
+      - name: check the existence of a directory                            # Lets's check wether the dir exists or not
+        stat:
+          path: /home/Ava/myfiles
+        register: directory
+      - name: print dir existence                                           
+        debug:
+          msg: "dir exists"                                                # This message appears as a result when the below conditions become true
+        when: directory.stat.isdir is defined

@@ -1,0 +1,48 @@
+  - hosts: muthu                                        # this is the group name in my invnetory file
+    remote_user: ubuntu                                 # user name of the instance
+    become: yes                                         # run with elevated priviliges 
+    tasks:
+      - name: apt update
+        apt:
+          update_cache: yes
+      - name: installing tools                          # installing some of the essential tools
+        apt:
+          name: "{{ item }}"
+          state: present
+        loop:                                           # this loop will give values to the "{{ item}}"
+          - git
+          - curl
+          - apache2
+          - python3-pip
+      - name: Adding Docker key                         # Adding docker gpg key to our local machine
+        get_url:
+          url: https://download.docker.com/linux/ubuntu/gpg
+          dest: /etc/apt/keyrings/gpg
+      - name: Converting Docker key                     # Docker key should be converted into binary form
+        ansible.builtin.shell:
+          cmd: gpg --dearmor --output /etc/apt/keyrings/docker.gpg /etc/apt/keyrings/gpg
+          creates: /etc/apt/keyrings/docker.gpg
+      - name: Adding docker repo                        # Adding docker repository
+        apt_repository:
+          filename: /etc/apt/sources.list.d/docker
+          repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   jammy stable
+          state: present
+      - name: apt update                                # apt update to update the local headers
+        apt:
+          update_cache: yes
+      - name: installing docker
+        apt:
+          name: docker-ce
+          state: present
+      - name: Install bottle python package             # This is a required dependency for ansible docker modules to work in the local 
+        ansible.builtin.pip:
+          name: docker
+      - name: Changing the port of apache2              # Changing the port of the apache2 server (by default it runs in port 80)
+        ansible.builtin.lineinfile:
+          path: /etc/apache2/ports.conf
+          regexp: '^Listen 80'
+          line: Listen 90
+      - name: Restarting the apache2                    # Restarting the apache 
+        service:
+          name: apache2
+          state: restarted

@@ -1,4 +1,4 @@
-  - hosts: muthu                                        # this is the group name in my invnetory file
+  - hosts: muthu                                        # this is the group name in my inventory file
     remote_user: ubuntu                                 # user name of the instance
     become: yes                                         # run with elevated priviliges 
     tasks:
@@ -9,7 +9,7 @@
         apt:
           name: "{{ item }}"
           state: present
-        loop:                                           # this loop will give values to the "{{ item}}"
+        loop:                                           # this loop will give values to the "{{ item }}"
           - git
           - curl
           - apache2
